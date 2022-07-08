@@ -1,6 +1,6 @@
 """
   Autor: vichShir
-  Versão: 1.0
+  Versão: 1.1
 """
 
 # Funcao que le um cenario do arquivo texto de nome nome_arquivo e o armazena
@@ -15,7 +15,6 @@ def CarregarFase(nome_arquivo): # todos os modos
   fase = []
   fase2 = []
   max_elements = 0
-  
   with open(nome_arquivo, 'r') as f:
     for line in f.readlines():
       line = line.replace('\n', '')
@@ -41,7 +40,7 @@ def ImprimirCenario(M): # modo 1
     print(''.join(row))
   return
 
-	
+  
 # Funcao  que testa se o cenario na matriz M e' um cenario valido. Todo 
 # cenario deve: ter um unico jogador; quantidade igual de caixas e locais de 
 # armazenamento; e pelo menos um lugar de armazenamento.
@@ -50,8 +49,18 @@ def ImprimirCenario(M): # modo 1
 # Devolve True ou False.
 def CenarioValido(M): # modo 2
   # Completar
-
-  return True   # alterar valor devolvido
+  n_players = 0
+  n_caixas = 0
+  n_locais = 0
+  for i in range(len(M)):
+    for j in range(len(M[0])):
+      if M[i][j] == '@' or M[i][j] == '+':
+        n_players += 1
+      if M[i][j] == '$':
+        n_caixas += 1
+      elif M[i][j] == '.':
+        n_locais += 1
+  return (n_players == 1) and (n_caixas == n_locais) and (n_locais > 0)   # alterar valor devolvido
 
 
 # Funcao que recebe a matriz de caracteres M (cenario) e devolve a posicao 
@@ -162,19 +171,19 @@ def GetPositions(M, x, y, mov):
   if mov == 'd':
     first_pos = M[y][x]
     second_pos = M[y][x+1]
-    third_pos = M[y][x+2] if second_pos is not '#' else ' '
+    third_pos = M[y][x+2] if second_pos != '#' else ' '
   elif mov == 'e':
     first_pos = M[y][x]
     second_pos = M[y][x-1]
-    third_pos = M[y][x-2] if second_pos is not '#' else ' '
+    third_pos = M[y][x-2] if second_pos != '#' else ' '
   elif mov == 'b':
     first_pos = M[y][x]
     second_pos = M[y+1][x]
-    third_pos = M[y+2][x] if second_pos is not '#' else ' '
+    third_pos = M[y+2][x] if second_pos != '#' else ' '
   elif mov == 'c':
     first_pos = M[y][x]
     second_pos = M[y-1][x]
-    third_pos = M[y-2][x] if second_pos is not '#' else ' '
+    third_pos = M[y-2][x] if second_pos != '#' else ' '
   return first_pos, second_pos, third_pos
 
 
@@ -283,6 +292,9 @@ def ImprimeMovimentos(Hmov): # usada na funcao Jogo (abaixo)
 # Nada devolve.
 def Jogo(M): # modo 7
   # Completar
+  if not CenarioValido(M):
+    print('Cenario invalido')
+    return
   print('Jogar: (c)ima / (b)aixo / (e)squerda / (d)ireita / (v)oltar / (s)air')
   ImprimirCenario(M)
   Hmov = []
@@ -299,7 +311,7 @@ def Jogo(M): # modo 7
         del Hmov[-1]
       else:
         temp_mov = MoverJogador(M, mov)
-        if temp_mov is not '':
+        if temp_mov != '':
           Hmov.append(temp_mov)
     if not leave:
       ImprimirCenario(M)
@@ -323,7 +335,7 @@ def main():
   if modo == '1':
     ImprimirCenario(fase)
   elif modo == '2':
-    pass # validar cenario
+    print('Cenario valido') if CenarioValido(fase) else print('Cenario invalido')
   elif modo == '3':
     x, y = ObterPosicaoJogador(fase)
     print(f'Jogador em: ({x} , {y})')
