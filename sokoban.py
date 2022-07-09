@@ -1,6 +1,6 @@
 """
   Autor: vichShir
-  Versão: 1.2
+  Versão: 1.3
 """
 
 
@@ -201,7 +201,11 @@ def VoltarJogador(M, mov): # modo 5
     goal_pos = '@'
     curr_pos = ' '
   elif mov == 'D' or mov == 'E' or mov == 'B' or mov == 'C': # Mover jogador e caixa
-    if curr_pos == '+' and neighbor_pos == '*':
+    if goal_pos == '.' and curr_pos == '+' and neighbor_pos == '*':
+      goal_pos = '+'
+      curr_pos = '*'
+      neighbor_pos = '.'
+    elif curr_pos == '+' and neighbor_pos == '*':
       goal_pos = '@'
       curr_pos = '*'
       neighbor_pos = '.'
@@ -349,12 +353,13 @@ def main():
     MoverJogador(fase, mov)
     ImprimirCenario(fase)
   elif modo == '5':
-    movs = input('Movimentos:')
-    last_mov = ''
+    movs = input('Movimentos: ')
+    last_movs = []
     for mov in movs[:-1]:
       temp_mov = MoverJogador(fase, mov)
-      last_mov = temp_mov
-    VoltarJogador(fase, last_mov)
+      if temp_mov != '':
+        last_movs.append(temp_mov)
+    VoltarJogador(fase, last_movs[-1])
     print('')
     ImprimirCenario(fase)
   elif modo == '6':
