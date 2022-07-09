@@ -1,7 +1,8 @@
 """
   Autor: vichShir
-  Versão: 1.1
+  Versão: 1.2
 """
+
 
 # Funcao que le um cenario do arquivo texto de nome nome_arquivo e o armazena
 # numa matriz de caracteres.
@@ -204,6 +205,10 @@ def VoltarJogador(M, mov): # modo 5
       goal_pos = '@'
       curr_pos = '*'
       neighbor_pos = '.'
+    elif goal_pos == '.':
+      goal_pos = '+'
+      curr_pos = '$'
+      neighbor_pos = ' '
     elif neighbor_pos == '*':
       goal_pos = '@'
       curr_pos = '$'
@@ -344,12 +349,13 @@ def main():
     MoverJogador(fase, mov)
     ImprimirCenario(fase)
   elif modo == '5':
-    movs = input('Movimento: ')
+    movs = input('Movimentos:')
     last_mov = ''
     for mov in movs[:-1]:
       temp_mov = MoverJogador(fase, mov)
       last_mov = temp_mov
     VoltarJogador(fase, last_mov)
+    print('')
     ImprimirCenario(fase)
   elif modo == '6':
     print('Fase completada') if FaseCompletada(fase) else print('Fase nao completada')
