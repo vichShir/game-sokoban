@@ -1,6 +1,6 @@
 """
   Autor: vichShir
-  Versão: 1.3
+  Versão: 1.4
 """
 
 
@@ -59,7 +59,7 @@ def CenarioValido(M): # modo 2
         n_players += 1
       if M[i][j] == '$':
         n_caixas += 1
-      elif M[i][j] == '.':
+      elif M[i][j] == '.' or M[i][j] == '+':
         n_locais += 1
   return (n_players == 1) and (n_caixas == n_locais) and (n_locais > 0)   # alterar valor devolvido
 
@@ -98,6 +98,9 @@ def MoverJogador(M, mov): # modo 4
   temp_mov = mov
   y, x = ObterPosicaoJogador(M)
   curr_pos, next_pos, third_pos = GetPositions(M, x, y, temp_mov)
+  # Movimento parado
+  if third_pos == '-1':
+    return ''
   # Realizar movimento
   if next_pos != '#':
     if (next_pos == '$' and third_pos == '$') or (next_pos == '$' and third_pos == '#') or (next_pos == '*' and third_pos == '#'):  # Empurar duas ou mais caixas ou empurrar caixa para parede
@@ -172,19 +175,19 @@ def GetPositions(M, x, y, mov):
   if mov == 'd':
     first_pos = M[y][x]
     second_pos = M[y][x+1]
-    third_pos = M[y][x+2] if second_pos != '#' else ' '
+    third_pos = M[y][x+2] if second_pos != '#' else '-1'
   elif mov == 'e':
     first_pos = M[y][x]
     second_pos = M[y][x-1]
-    third_pos = M[y][x-2] if second_pos != '#' else ' '
+    third_pos = M[y][x-2] if second_pos != '#' else '-1'
   elif mov == 'b':
     first_pos = M[y][x]
     second_pos = M[y+1][x]
-    third_pos = M[y+2][x] if second_pos != '#' else ' '
+    third_pos = M[y+2][x] if second_pos != '#' else '-1'
   elif mov == 'c':
     first_pos = M[y][x]
     second_pos = M[y-1][x]
-    third_pos = M[y-2][x] if second_pos != '#' else ' '
+    third_pos = M[y-2][x] if second_pos != '#' else '-1'
   return first_pos, second_pos, third_pos
 
 
@@ -198,8 +201,12 @@ def VoltarJogador(M, mov): # modo 5
   y, x = ObterPosicaoJogador(M)
   goal_pos, curr_pos, neighbor_pos = GetBackPositions(M, x, y, mov)
   if mov == 'd' or mov == 'e' or mov == 'b' or mov == 'c': # Mover jogador
-    goal_pos = '@'
-    curr_pos = ' '
+    if goal_pos == '.':
+      goal_pos = '+'
+      curr_pos = ' '
+    else:
+      goal_pos = '@'
+      curr_pos = ' '
   elif mov == 'D' or mov == 'E' or mov == 'B' or mov == 'C': # Mover jogador e caixa
     if goal_pos == '.' and curr_pos == '+' and neighbor_pos == '*':
       goal_pos = '+'
@@ -309,7 +316,7 @@ def Jogo(M): # modo 7
   Hmov = []
   leave = False
   while not FaseCompletada(M) and not leave:
-    movs = input('Sequencia de movimentos: ')
+    movs = input('Sequencia de movimentos: \n')
     for mov in movs:
       if mov == 's':
         leave = True
@@ -337,11 +344,12 @@ def Jogo(M): # modo 7
 # Nada devolve.
 def main():
   # Completar
-  nome_arquivo = input('Nome arquivo: ')
-  modo = input('Modo: ')
+  nome_arquivo = input('Nome arquivo: \n')
+  modo = input('Modo: \n')
   fase = CarregarFase(nome_arquivo)
 
   if modo == '1':
+    print('')
     ImprimirCenario(fase)
   elif modo == '2':
     print('Cenario valido') if CenarioValido(fase) else print('Cenario invalido')
@@ -349,7 +357,7 @@ def main():
     x, y = ObterPosicaoJogador(fase)
     print(f'Jogador em: ({x} , {y})')
   elif modo == '4':
-    mov = input('Movimento: ')
+    mov = input('Movimento: \n')
     MoverJogador(fase, mov)
     ImprimirCenario(fase)
   elif modo == '5':
