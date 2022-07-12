@@ -1,13 +1,114 @@
 """
   Autor: vichShir
-  Versão: 1.8
+  Versão: 1.9
 """
 
 
-class Sokoban():
+class SceneLoader():
 
   def __init__(self, nome_arquivo):
     self.fase = self.CarregarFase(nome_arquivo)
+
+
+  # Funcao que le um cenario do arquivo texto de nome nome_arquivo e o armazena
+  # numa matriz de caracteres.
+  # Todas as linhas da matriz devem ter o mesmo numero de elementos.
+  # No caso de arquivos texto com diferentes quantidades de caracteres por linha,
+  # as linhas da matriz com menos elementos devem ser completadas com espacos em
+  # branco a direita. 
+  # Devolve a matriz do cenário.
+  def CarregarFase(self, nome_arquivo):
+    fase = []
+    max_elements = 0
+    with open(nome_arquivo, 'r') as f:
+      for line in f.readlines():
+        line = line.replace('\n', '')
+        fase.append(line)
+        if len(line) > max_elements:
+          max_elements = len(line)
+    for i in range(len(fase)):
+      n_fill = max_elements - len(fase[i])
+      fase[i] = list(fase[i] + (' ' * n_fill))
+    return fase
+
+
+  # Funcao que recebe uma matriz de cenario M e a imprime tal como ela aparece
+  # no arquivo texto de onde foi carregada.
+  # Nada devolve.
+  def ImprimirCenario(self, M):
+    for row in M:
+      print(''.join(row))
+    return
+
+
+  # Funcao  que testa se o cenario na matriz M e' um cenario valido. Todo 
+  # cenario deve: ter um unico jogador; quantidade igual de caixas e locais de 
+  # armazenamento; e pelo menos um lugar de armazenamento.
+  # A funcao deve devolver True (se cenario valido) ou False (se cenario  
+  # invalido).
+  # Devolve True ou False.
+  def CenarioValido(self, M):
+    n_players, n_caixas, n_locais = [self.GetStats(M)[x] for x in ['players', 'caixas', 'locais']]
+    return (n_players == 1) and (n_caixas == n_locais) and (n_locais > 0)
+
+
+  # Funcao que verifica se todas caixas na matriz M estao colocadas nas posicoes
+  # predeterminadas (alvo), o que indicara o fim do jogo com sucesso. A funcao 
+  # deve devolver verdadeiro (no caso da vitoria do jogador) ou falso (no caso 
+  # de jogo nao encerrado).
+  # Devolve True ou False.
+  def FaseCompletada(self, M):
+    n_caixas, n_locais = [self.GetStats(M)[x] for x in ['caixas', 'locais']]
+    return (n_caixas == 0) and (n_locais == 0)
+
+
+  def UpdateScore(self, M):
+    self.score = self.GetStats(M)['cx_local']
+
+  
+  def GetStats(self, M):
+    n_players = 0
+    n_caixas = 0
+    n_locais = 0
+    n_cx_local = 0
+    for i in range(len(M)):
+      for j in range(len(M[0])):
+        if M[i][j] == '@' or M[i][j] == '+':
+          n_players += 1
+        if M[i][j] == '$':
+          n_caixas += 1
+        elif M[i][j] == '.' or M[i][j] == '+':
+          n_locais += 1
+        if M[i][j] == '*':
+          n_cx_local += 1
+    return {
+        'players': n_players,
+        'caixas': n_caixas,
+        'locais': n_locais,
+        'cx_local': n_cx_local
+    }
+
+
+  # Funcao que recebe a matriz de caracteres M (cenario) e devolve a posicao 
+  # do jogador no cenario (ou seja, a linha i e coluna j para a qual M[i][j]=='@'
+  # ou M[i][j]=='+').
+  # Se nao existe um jogador dentro do cenario, entao a funcao deve devolver
+  # os valores -1,-1. 
+  # Devolve a posicao i,j do jogador.
+  def ObterPosicaoJogador(self, M):
+    for i in range(len(M)):
+      for j in range(len(M[0])):
+        if M[i][j] == '@' or M[i][j] == '+':
+          p_pos = (i, j)
+    if p_pos is None:
+      p_pos = -1, -1
+    return p_pos
+
+
+class Sokoban(SceneLoader):
+
+  def __init__(self, nome_arquivo):
+    super(Sokoban, self).__init__(nome_arquivo)
   
 
   # Funcao que recebe a matriz M de cenario e executa o jogo. Deve imprimir uma
@@ -25,7 +126,7 @@ class Sokoban():
     if not self.CenarioValido(M):
       print('Cenario invalido')
       return
-    _, _, n_locais = self.GetStats(M)
+    n_locais = self.GetStats(M)['locais']
     print('Jogar: (c)ima / (b)aixo / (e)squerda / (d)ireita / (v)oltar / (s)air')
     self.ImprimirCenario(M)
     Hmov = []
@@ -51,92 +152,6 @@ class Sokoban():
         if self.FaseCompletada(M):
           print('Parabens, fase completada!')
           self.ImprimeMovimentos(''.join(Hmov))
-
-
-  # Funcao que le um cenario do arquivo texto de nome nome_arquivo e o armazena
-  # numa matriz de caracteres.
-  # Todas as linhas da matriz devem ter o mesmo numero de elementos.
-  # No caso de arquivos texto com diferentes quantidades de caracteres por linha,
-  # as linhas da matriz com menos elementos devem ser completadas com espacos em
-  # branco a direita. 
-  # Devolve a matriz do cenário.
-  def CarregarFase(self, nome_arquivo):
-    fase = []
-    max_elements = 0
-    with open(nome_arquivo, 'r') as f:
-      for line in f.readlines():
-        line = line.replace('\n', '')
-        fase.append(line)
-        if len(line) > max_elements:
-          max_elements = len(line)
-    for i in range(len(fase)):
-      row = list(self.FillString(fase[i], max_elements))
-      fase[i] = row
-    return fase
-
-
-  def FillString(self, text, len_goal):
-    n_fill = len_goal - len(text)
-    return text + (' ' * n_fill)
-
-
-  # Funcao que recebe uma matriz de cenario M e a imprime tal como ela aparece
-  # no arquivo texto de onde foi carregada.
-  # Nada devolve.
-  def ImprimirCenario(self, M):
-    for row in M:
-      print(''.join(row))
-    return
-
-  
-  # Funcao  que testa se o cenario na matriz M e' um cenario valido. Todo 
-  # cenario deve: ter um unico jogador; quantidade igual de caixas e locais de 
-  # armazenamento; e pelo menos um lugar de armazenamento.
-  # A funcao deve devolver True (se cenario valido) ou False (se cenario  
-  # invalido).
-  # Devolve True ou False.
-  def CenarioValido(self, M):
-    n_players, n_caixas, n_locais = self.GetStats(M)
-    return (n_players == 1) and (n_caixas == n_locais) and (n_locais > 0)   # alterar valor devolvido
-
-  
-  def GetStats(self, M):
-    n_players = 0
-    n_caixas = 0
-    n_locais = 0
-    for i in range(len(M)):
-      for j in range(len(M[0])):
-        if M[i][j] == '@' or M[i][j] == '+':
-          n_players += 1
-        if M[i][j] == '$':
-          n_caixas += 1
-        elif M[i][j] == '.' or M[i][j] == '+':
-          n_locais += 1
-    return n_players, n_caixas, n_locais
-
-
-  # Funcao que recebe a matriz de caracteres M (cenario) e devolve a posicao 
-  # do jogador no cenario (ou seja, a linha i e coluna j para a qual M[i][j]=='@'
-  # ou M[i][j]=='+').
-  # Se nao existe um jogador dentro do cenario, entao a funcao deve devolver
-  # os valores -1,-1. 
-  # Devolve a posicao i,j do jogador.
-  def ObterPosicaoJogador(self, M):
-    for i in range(len(M)):
-      for j in range(len(M[0])):
-        if M[i][j] == '@' or M[i][j] == '+':
-          p_pos = (i, j)
-    if p_pos is None:
-      p_pos = -1, -1
-    return p_pos
-
-
-  def UpdateScore(self, M):
-    self.score = 0
-    for i in range(len(M)):
-      for j in range(len(M[0])):
-        if M[i][j] == '*':
-          self.score += 1
 
 
   # Funcao que realiza o movimento dado pelo caracter em mov, atualizando 
@@ -325,23 +340,6 @@ class Sokoban():
     return goal_pos, curr_pos, neighbor_pos
 
 
-  # Funcao que verifica se todas caixas na matriz M estao colocadas nas posicoes
-  # predeterminadas (alvo), o que indicara o fim do jogo com sucesso. A funcao 
-  # deve devolver verdadeiro (no caso da vitoria do jogador) ou falso (no caso 
-  # de jogo nao encerrado).
-  # Devolve True ou False.
-  def FaseCompletada(self, M):
-    n_caixas = 0
-    n_locais = 0
-    for i in range(len(M)):
-      for j in range(len(M[0])):
-        if M[i][j] == '$':
-          n_caixas += 1
-        elif M[i][j] == '.':
-          n_locais += 1
-    return (n_caixas == 0) and (n_locais == 0)    # alterar valor devolvido
-
-
   # Funcao que recebe uma cadeia de caracteres Hmov com uma sequência de 
   # movimentos e imprime o numero de movimentos e os movimentos propriamente
   # ditos, devendo ser usada pela funcao Jogo (no modo 7).
@@ -358,4 +356,4 @@ def main():
   game.play()
 
 
-main()
+  main()
