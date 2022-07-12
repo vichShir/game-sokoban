@@ -1,6 +1,6 @@
 """
   Autor: vichShir
-  Versão: 1.7
+  Versão: 1.8
 """
 
 
@@ -21,9 +21,11 @@ class Sokoban():
   # Nada devolve.
   def play(self):
     M = self.fase
+    self.score = 0
     if not self.CenarioValido(M):
       print('Cenario invalido')
       return
+    _, _, n_locais = self.GetStats(M)
     print('Jogar: (c)ima / (b)aixo / (e)squerda / (d)ireita / (v)oltar / (s)air')
     self.ImprimirCenario(M)
     Hmov = []
@@ -43,6 +45,8 @@ class Sokoban():
           if temp_mov != '':
             Hmov.append(temp_mov)
       if not leave:
+        self.UpdateScore(M)
+        print(f'Score: {self.score}/{n_locais}')
         self.ImprimirCenario(M)
         if self.FaseCompletada(M):
           print('Parabens, fase completada!')
@@ -84,7 +88,7 @@ class Sokoban():
       print(''.join(row))
     return
 
-    
+  
   # Funcao  que testa se o cenario na matriz M e' um cenario valido. Todo 
   # cenario deve: ter um unico jogador; quantidade igual de caixas e locais de 
   # armazenamento; e pelo menos um lugar de armazenamento.
@@ -92,6 +96,11 @@ class Sokoban():
   # invalido).
   # Devolve True ou False.
   def CenarioValido(self, M):
+    n_players, n_caixas, n_locais = self.GetStats(M)
+    return (n_players == 1) and (n_caixas == n_locais) and (n_locais > 0)   # alterar valor devolvido
+
+  
+  def GetStats(self, M):
     n_players = 0
     n_caixas = 0
     n_locais = 0
@@ -103,7 +112,7 @@ class Sokoban():
           n_caixas += 1
         elif M[i][j] == '.' or M[i][j] == '+':
           n_locais += 1
-    return (n_players == 1) and (n_caixas == n_locais) and (n_locais > 0)   # alterar valor devolvido
+    return n_players, n_caixas, n_locais
 
 
   # Funcao que recebe a matriz de caracteres M (cenario) e devolve a posicao 
@@ -120,6 +129,14 @@ class Sokoban():
     if p_pos is None:
       p_pos = -1, -1
     return p_pos
+
+
+  def UpdateScore(self, M):
+    self.score = 0
+    for i in range(len(M)):
+      for j in range(len(M[0])):
+        if M[i][j] == '*':
+          self.score += 1
 
 
   # Funcao que realiza o movimento dado pelo caracter em mov, atualizando 
