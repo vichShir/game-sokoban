@@ -1,6 +1,6 @@
 """
   Autor: vichShir
-  Versão: 1.5
+  Versão: 1.6
 """
 
 
@@ -29,7 +29,7 @@ class Sokoban():
     Hmov = []
     leave = False
     while not self.FaseCompletada(M) and not leave:
-      movs = input('Sequencia de movimentos: \n')
+      movs = input('Sequencia de movimentos: ')
       for mov in movs:
         if mov == 's':
           leave = True
@@ -56,8 +56,7 @@ class Sokoban():
   # as linhas da matriz com menos elementos devem ser completadas com espacos em
   # branco a direita. 
   # Devolve a matriz do cenário.
-  def CarregarFase(self, nome_arquivo): # todos os modos
-    # completar
+  def CarregarFase(self, nome_arquivo):
     fase = []
     fase2 = []
     max_elements = 0
@@ -69,7 +68,7 @@ class Sokoban():
           max_elements = len(line)
     for element in fase:
       fase2.append(list(self.FillString(element, max_elements)))
-    return fase2  # alterar valor devolvido
+    return fase2
 
 
   def FillString(self, text, len_goal):
@@ -80,8 +79,7 @@ class Sokoban():
   # Funcao que recebe uma matriz de cenario M e a imprime tal como ela aparece
   # no arquivo texto de onde foi carregada.
   # Nada devolve.
-  def ImprimirCenario(self, M): # modo 1
-    # completar
+  def ImprimirCenario(self, M):
     for row in M:
       print(''.join(row))
     return
@@ -93,8 +91,7 @@ class Sokoban():
   # A funcao deve devolver True (se cenario valido) ou False (se cenario  
   # invalido).
   # Devolve True ou False.
-  def CenarioValido(self, M): # modo 2
-    # Completar
+  def CenarioValido(self, M):
     n_players = 0
     n_caixas = 0
     n_locais = 0
@@ -115,15 +112,14 @@ class Sokoban():
   # Se nao existe um jogador dentro do cenario, entao a funcao deve devolver
   # os valores -1,-1. 
   # Devolve a posicao i,j do jogador.
-  def ObterPosicaoJogador(self, M): # modo 3
-    # Completar
+  def ObterPosicaoJogador(self, M):
     for i in range(len(M)):
       for j in range(len(M[0])):
         if M[i][j] == '@' or M[i][j] == '+':
           p_pos = (i, j)
     if p_pos is None:
       p_pos = -1, -1
-    return p_pos  # alterar valor devolvido
+    return p_pos
 
 
   # Funcao que realiza o movimento dado pelo caracter em mov, atualizando 
@@ -138,8 +134,7 @@ class Sokoban():
   # pelo movimento, entao a funcao deve devolver a letra armazenada em mov 
   # convertida para letra maiuscula. 
   # Devolve caractere do movimento efetivado (eventualmente vazio '').
-  def MoverJogador(self, M, mov): # modo 4
-    # Completar
+  def MoverJogador(self, M, mov):
     temp_mov = mov
     y, x = self.ObterPosicaoJogador(M)
     curr_pos, next_pos, third_pos = self.GetPositions(M, x, y, temp_mov)
@@ -241,8 +236,7 @@ class Sokoban():
   # pode ter qualquer dos seguintes valores: 'c', 'C', 'b', 'B', 'e', 'E', 
   # 'd', 'D'.
   # Nada devolve (mas altera M).
-  def VoltarJogador(self, M, mov): # modo 5
-    # Completar
+  def VoltarJogador(self, M, mov):
     y, x = self.ObterPosicaoJogador(M)
     goal_pos, curr_pos, neighbor_pos = self.GetBackPositions(M, x, y, mov)
     if mov == 'd' or mov == 'e' or mov == 'b' or mov == 'c': # Mover jogador
@@ -319,8 +313,7 @@ class Sokoban():
   # deve devolver verdadeiro (no caso da vitoria do jogador) ou falso (no caso 
   # de jogo nao encerrado).
   # Devolve True ou False.
-  def FaseCompletada(self, M): # modo 6
-    # Completar
+  def FaseCompletada(self, M):
     n_caixas = 0
     n_locais = 0
     for i in range(len(M)):
@@ -336,20 +329,13 @@ class Sokoban():
   # movimentos e imprime o numero de movimentos e os movimentos propriamente
   # ditos, devendo ser usada pela funcao Jogo (no modo 7).
   # Nada devolve.
-  def ImprimeMovimentos(self, Hmov): # usada na funcao Jogo (abaixo)
-    # Completar
+  def ImprimeMovimentos(self, Hmov):
     print(f'Total movimentos: {len(Hmov)}')
     print(f'Movimentos: {Hmov}')
     return 
 
 
-# Funcao principal
-# A funcao devera primeiro solicitar do usuario que digite o nome do arquivo
-# com o cenario, depois solicitar o modo (1 ate 7), entao invocar a funcao 
-# adequada.
-# Nada devolve.
 def main():
-  # Completar
   nome_arquivo = input('Nome arquivo: ')
   game = Sokoban(nome_arquivo)
   game.play()
