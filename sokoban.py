@@ -1,6 +1,6 @@
 """
   Autor: vichShir
-  Versão: 1.6
+  Versão: 1.7
 """
 
 
@@ -58,7 +58,6 @@ class Sokoban():
   # Devolve a matriz do cenário.
   def CarregarFase(self, nome_arquivo):
     fase = []
-    fase2 = []
     max_elements = 0
     with open(nome_arquivo, 'r') as f:
       for line in f.readlines():
@@ -66,9 +65,10 @@ class Sokoban():
         fase.append(line)
         if len(line) > max_elements:
           max_elements = len(line)
-    for element in fase:
-      fase2.append(list(self.FillString(element, max_elements)))
-    return fase2
+    for i in range(len(fase)):
+      row = list(self.FillString(fase[i], max_elements))
+      fase[i] = row
+    return fase
 
 
   def FillString(self, text, len_goal):
@@ -288,7 +288,7 @@ class Sokoban():
     return
 
 
-  def GetBackPositions(M, x, y, mov):
+  def GetBackPositions(self, M, x, y, mov):
     if mov == 'd' or mov == 'D':
       goal_pos = M[y][x-1]
       curr_pos = M[y][x]
