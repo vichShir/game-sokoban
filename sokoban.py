@@ -1,6 +1,6 @@
 """
   Autor: vichShir
-  Versão: 1.11
+  Versão: 1.12
 """
 
 
@@ -32,8 +32,8 @@ class SceneLoader():
   # Funcao que recebe uma matriz de cenario M e a imprime tal como ela aparece
   # no arquivo texto de onde foi carregada.
   # Nada devolve.
-  def ImprimirCenario(self, M):
-    for row in M:
+  def ImprimirCenario(self):
+    for row in self.fase:
       print(''.join(row))
 
 
@@ -43,8 +43,8 @@ class SceneLoader():
   # A funcao deve devolver True (se cenario valido) ou False (se cenario  
   # invalido).
   # Devolve True ou False.
-  def CenarioValido(self, M):
-    n_players, n_caixas, n_locais = [self.GetStats(M)[x] for x in ['players', 'caixas', 'locais']]
+  def CenarioValido(self):
+    n_players, n_caixas, n_locais = [self.GetStats()[x] for x in ['players', 'caixas', 'locais']]
     return (n_players == 1) and (n_caixas == n_locais) and (n_locais > 0)
 
 
@@ -53,29 +53,29 @@ class SceneLoader():
   # deve devolver verdadeiro (no caso da vitoria do jogador) ou falso (no caso 
   # de jogo nao encerrado).
   # Devolve True ou False.
-  def FaseCompletada(self, M):
-    n_caixas, n_locais = [self.GetStats(M)[x] for x in ['caixas', 'locais']]
+  def FaseCompletada(self):
+    n_caixas, n_locais = [self.GetStats()[x] for x in ['caixas', 'locais']]
     return (n_caixas == 0) and (n_locais == 0)
 
 
-  def UpdateScore(self, M):
-    self.score = self.GetStats(M)['cx_local']
+  def UpdateScore(self):
+    self.score = self.GetStats()['cx_local']
 
   
-  def GetStats(self, M):
+  def GetStats(self):
     n_players = 0
     n_caixas = 0
     n_locais = 0
     n_cx_local = 0
-    for i in range(len(M)):
-      for j in range(len(M[0])):
-        if M[i][j] == '@' or M[i][j] == '+':
+    for i in range(len(self.fase)):
+      for j in range(len(self.fase[0])):
+        if self.fase[i][j] == '@' or self.fase[i][j] == '+':
           n_players += 1
-        if M[i][j] == '$':
+        if self.fase[i][j] == '$':
           n_caixas += 1
-        elif M[i][j] == '.' or M[i][j] == '+':
+        elif self.fase[i][j] == '.' or self.fase[i][j] == '+':
           n_locais += 1
-        if M[i][j] == '*':
+        if self.fase[i][j] == '*':
           n_cx_local += 1
     return {
         'players': n_players,
@@ -91,10 +91,10 @@ class SceneLoader():
   # Se nao existe um jogador dentro do cenario, entao a funcao deve devolver
   # os valores -1,-1. 
   # Devolve a posicao i,j do jogador.
-  def ObterPosicaoJogador(self, M):
-    for i in range(len(M)):
-      for j in range(len(M[0])):
-        if M[i][j] == '@' or M[i][j] == '+':
+  def ObterPosicaoJogador(self):
+    for i in range(len(self.fase)):
+      for j in range(len(self.fase[0])):
+        if self.fase[i][j] == '@' or self.fase[i][j] == '+':
           p_pos = (i, j)
     if p_pos is None:
       p_pos = -1, -1
@@ -107,6 +107,11 @@ class Sokoban(SceneLoader):
     super(Sokoban, self).__init__(nome_arquivo)
   
 
+  def _console(self):
+    print('Jogar: (c)ima / (b)aixo / (e)squerda / (d)ireita / (v)oltar / (s)air')
+    self.ImprimirCenario()
+
+
   # Funcao que recebe a matriz M de cenario e executa o jogo. Deve imprimir uma
   # unica vez a mensagem "Jogar: (c)ima / (b)aixo / (e)squerda / (d)ireita / 
   # (v)oltar / (s)air", depois a matriz com o cenario inicial, entao imprimir a 
@@ -117,17 +122,18 @@ class Sokoban(SceneLoader):
   # movimentos. Repetir ate finalizar jogo ou sair. 
   # Nada devolve.
   def play(self):
-    M = self.fase
-    self.score = 0
-    if not self.CenarioValido(M):
+    if not self.CenarioValido():
       print('Cenario invalido')
       return
-    n_locais = self.GetStats(M)['locais']
-    print('Jogar: (c)ima / (b)aixo / (e)squerda / (d)ireita / (v)oltar / (s)air')
-    self.ImprimirCenario(M)
+
+    self._console()
+
     Hmov = []
     leave = False
-    while not self.FaseCompletada(M) and not leave:
+    self.score = 0
+    n_locais = self.GetStats()['locais']
+
+    while not self.FaseCompletada() and not leave:
       movs = input('Sequencia de movimentos: ')
       for mov in movs:
         if mov == 's':
@@ -135,17 +141,17 @@ class Sokoban(SceneLoader):
           print('Fim do jogo')
           break
         elif mov == 'v':
-          self.VoltarJogador(M, Hmov[-1])
+          self.VoltarJogador(Hmov[-1])
           del Hmov[-1]
         else:
-          temp_mov = self.MoverJogador(M, mov)
+          temp_mov = self.MoverJogador(mov)
           if temp_mov != '':
             Hmov.append(temp_mov)
       if not leave:
-        self.UpdateScore(M)
+        self.UpdateScore()
         print(f'Score: {self.score}/{n_locais}')
-        self.ImprimirCenario(M)
-        if self.FaseCompletada(M):
+        self.ImprimirCenario()
+        if self.FaseCompletada():
           print('Parabens, fase completada!')
           self.ImprimeMovimentos(''.join(Hmov))
 
@@ -162,10 +168,10 @@ class Sokoban(SceneLoader):
   # pelo movimento, entao a funcao deve devolver a letra armazenada em mov 
   # convertida para letra maiuscula. 
   # Devolve caractere do movimento efetivado (eventualmente vazio '').
-  def MoverJogador(self, M, mov):
+  def MoverJogador(self, mov):
     temp_mov = mov
-    y, x = self.ObterPosicaoJogador(M)
-    curr_pos, next_pos, third_pos = self.GetPositions(M, x, y, temp_mov)
+    y, x = self.ObterPosicaoJogador()
+    curr_pos, next_pos, third_pos = self.GetPositions(self.fase, x, y, temp_mov)
     # Movimento parado
     if third_pos == '-1':
       return ''
@@ -221,21 +227,21 @@ class Sokoban(SceneLoader):
       mov = ''
     # Atualizar matriz
     if temp_mov == 'd':
-      M[y][x] = curr_pos
-      M[y][x+1] = next_pos
-      M[y][x+2] = third_pos
+      self.fase[y][x] = curr_pos
+      self.fase[y][x+1] = next_pos
+      self.fase[y][x+2] = third_pos
     elif temp_mov == 'e':
-      M[y][x] = curr_pos
-      M[y][x-1] = next_pos
-      M[y][x-2] = third_pos
+      self.fase[y][x] = curr_pos
+      self.fase[y][x-1] = next_pos
+      self.fase[y][x-2] = third_pos
     elif temp_mov == 'b':
-      M[y][x] = curr_pos
-      M[y+1][x] = next_pos
-      M[y+2][x] = third_pos
+      self.fase[y][x] = curr_pos
+      self.fase[y+1][x] = next_pos
+      self.fase[y+2][x] = third_pos
     elif temp_mov == 'c':
-      M[y][x] = curr_pos
-      M[y-1][x] = next_pos
-      M[y-2][x] = third_pos
+      self.fase[y][x] = curr_pos
+      self.fase[y-1][x] = next_pos
+      self.fase[y-2][x] = third_pos
     return mov   # alterar valor devolvido
 
 
@@ -264,9 +270,9 @@ class Sokoban(SceneLoader):
   # pode ter qualquer dos seguintes valores: 'c', 'C', 'b', 'B', 'e', 'E', 
   # 'd', 'D'.
   # Nada devolve (mas altera M).
-  def VoltarJogador(self, M, mov):
-    y, x = self.ObterPosicaoJogador(M)
-    goal_pos, curr_pos, neighbor_pos = self.GetBackPositions(M, x, y, mov)
+  def VoltarJogador(self, mov):
+    y, x = self.ObterPosicaoJogador()
+    goal_pos, curr_pos, neighbor_pos = self.GetBackPositions(self.fase, x, y, mov)
     if mov == 'd' or mov == 'e' or mov == 'b' or mov == 'c': # Mover jogador
       if goal_pos == '.':
         goal_pos = '+'
@@ -298,21 +304,21 @@ class Sokoban(SceneLoader):
     
     # Atualizar matriz
     if mov == 'd' or mov == 'D':
-      M[y][x-1] = goal_pos
-      M[y][x] = curr_pos
-      M[y][x+1] = neighbor_pos
+      self.fase[y][x-1] = goal_pos
+      self.fase[y][x] = curr_pos
+      self.fase[y][x+1] = neighbor_pos
     elif mov == 'e' or mov == 'E':
-      M[y][x+1] = goal_pos
-      M[y][x] = curr_pos
-      M[y][x-1] = neighbor_pos
+      self.fase[y][x+1] = goal_pos
+      self.fase[y][x] = curr_pos
+      self.fase[y][x-1] = neighbor_pos
     elif mov == 'b' or mov == 'B':
-      M[y-1][x] = goal_pos
-      M[y][x] = curr_pos
-      M[y+1][x] = neighbor_pos
+      self.fase[y-1][x] = goal_pos
+      self.fase[y][x] = curr_pos
+      self.fase[y+1][x] = neighbor_pos
     elif mov == 'c' or mov == 'C':
-      M[y+1][x] = goal_pos
-      M[y][x] = curr_pos
-      M[y-1][x] = neighbor_pos
+      self.fase[y+1][x] = goal_pos
+      self.fase[y][x] = curr_pos
+      self.fase[y-1][x] = neighbor_pos
 
 
   def GetBackPositions(self, M, x, y, mov):
