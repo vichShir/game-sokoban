@@ -1,6 +1,6 @@
 """
   Autor: vichShir
-  Versão: 1.9
+  Versão: 1.10
 """
 
 
@@ -38,7 +38,6 @@ class SceneLoader():
   def ImprimirCenario(self, M):
     for row in M:
       print(''.join(row))
-    return
 
 
   # Funcao  que testa se o cenario na matriz M e' um cenario valido. Todo 
@@ -317,7 +316,6 @@ class Sokoban(SceneLoader):
       M[y+1][x] = goal_pos
       M[y][x] = curr_pos
       M[y-1][x] = neighbor_pos
-    return
 
 
   def GetBackPositions(self, M, x, y, mov):
@@ -347,13 +345,12 @@ class Sokoban(SceneLoader):
   def ImprimeMovimentos(self, Hmov):
     print(f'Total movimentos: {len(Hmov)}')
     print(f'Movimentos: {Hmov}')
-    return 
 
 
 def main():
-  nome_arquivo = input('Nome arquivo: ')
-  game = Sokoban(nome_arquivo)
+  arquivo = input('Nome arquivo: ')
+  game = Sokoban(arquivo)
   game.play()
 
 
-  main()
+main()
