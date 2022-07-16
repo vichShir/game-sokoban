@@ -1,13 +1,13 @@
 """
   Autor: vichShir
-  Versão: 1.10
+  Versão: 1.11
 """
 
 
 class SceneLoader():
 
   def __init__(self, nome_arquivo):
-    self.fase = self.CarregarFase(nome_arquivo)
+    self.CarregarFase(nome_arquivo)
 
 
   # Funcao que le um cenario do arquivo texto de nome nome_arquivo e o armazena
@@ -18,18 +18,15 @@ class SceneLoader():
   # branco a direita. 
   # Devolve a matriz do cenário.
   def CarregarFase(self, nome_arquivo):
-    fase = []
-    max_elements = 0
+    self.fase = []
     with open(nome_arquivo, 'r') as f:
       for line in f.readlines():
         line = line.replace('\n', '')
-        fase.append(line)
-        if len(line) > max_elements:
-          max_elements = len(line)
-    for i in range(len(fase)):
-      n_fill = max_elements - len(fase[i])
-      fase[i] = list(fase[i] + (' ' * n_fill))
-    return fase
+        self.fase.append(line)
+    max_len = max([len(x) for x in self.fase])
+    for i in range(len(self.fase)):
+      n_fill = max_len - len(self.fase[i])
+      self.fase[i] = list(self.fase[i] + (' ' * n_fill))
 
 
   # Funcao que recebe uma matriz de cenario M e a imprime tal como ela aparece
